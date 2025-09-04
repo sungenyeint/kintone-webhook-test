@@ -1,36 +1,37 @@
 const express = require('express');
-const fs = require('fs');
-const ExcelJS = require('exceljs');
-
+const axios = require('axios');
 const app = express();
 app.use(express.json());
 
+// Slack Webhook URL
+const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+
 app.get('/', (req, res) => {
-  res.send('Kintone to Excel Webhook Listener');
+  res.send('Kintone → Slack Webhook Listener');
 });
 
+// Kintone webhook endpoint
 app.post('/kintone-webhook', async (req, res) => {
-  const record = req.body.record; // webhook payload
+  console.log('Received Kintone webhook:', req.body);
+  try {
+    const record = req.body.record;
+    const message = `New Kintone Record Added: ${record.Text.value}`; // Adjust field code
 
-    const filePath = 'kintone_records.xlsx';
-    const workbook = new ExcelJS.Workbook();
-    let sheet;
+    // Send message to Slack
+    await axios.post(SLACK_WEBHOOK_URL, {
+      text: message
+    });
 
-    // If file exists, read and append; else, create new
-    if (fs.existsSync(filePath)) {
-      await workbook.xlsx.readFile(filePath);
-      sheet = workbook.getWorksheet('Records') || workbook.worksheets[0];
-    } else {
-      sheet = workbook.addWorksheet('Records');
-      sheet.addRow(['Text']); // Header row
-    }
-
-    // Add new record row (fieldCode: Text)
-    sheet.addRow([record.Text.value]);
-
-    await workbook.xlsx.writeFile(filePath);
-    console.log('Excel updated!');
+    console.log('Slack notification sent:', message);
     res.status(200).send('OK');
+  } catch (err) {
+    console.error('Error sending to Slack:', err);
+    res.status(500).send('Error');
+  }
 });
+
+// app.listen(3000, () => {
+//   console.log('Server running on http://localhost:3000');
+// });
 
 module.exports = app;
