@@ -4,7 +4,7 @@ const app = express();
 app.use(express.json());
 
 // Slack Webhook URL
-const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
 
 app.get('/', (req, res) => {
   res.send('Kintone → Slack Webhook Listener');
