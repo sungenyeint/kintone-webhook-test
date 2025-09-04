@@ -12,21 +12,25 @@ app.get('/', (req, res) => {
 app.post('/kintone-webhook', async (req, res) => {
   const record = req.body.record; // webhook payload
 
-  // Create a new Excel workbook
-  const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet('Records');
+    const filePath = 'kintone_records.xlsx';
+    const workbook = new ExcelJS.Workbook();
+    let sheet;
 
-  // Add header row
-  sheet.addRow(['Customer', 'Inquiry', 'Status']);
+    // If file exists, read and append; else, create new
+    if (fs.existsSync(filePath)) {
+      await workbook.xlsx.readFile(filePath);
+      sheet = workbook.getWorksheet('Records') || workbook.worksheets[0];
+    } else {
+      sheet = workbook.addWorksheet('Records');
+      sheet.addRow(['Text']); // Header row
+    }
 
-  // Add record data (adjust field codes)
-  sheet.addRow([record.customer.value, record.inquiry.value, record.status.value]);
+    // Add new record row (fieldCode: Text)
+    sheet.addRow([record.Text.value]);
 
-  // Save Excel file
-  await workbook.xlsx.writeFile('kintone_records.xlsx');
-
-  console.log('Excel updated!');
-  res.status(200).send('OK');
+    await workbook.xlsx.writeFile(filePath);
+    console.log('Excel updated!');
+    res.status(200).send('OK');
 });
 
 module.exports = app;
