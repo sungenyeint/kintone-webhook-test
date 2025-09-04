@@ -1,10 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
 app.use(express.json());
-
-// Slack Webhook URL
-const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
 
 app.get('/', (req, res) => {
   res.send('Kintone → Slack Webhook Listener');
@@ -18,7 +16,7 @@ app.post('/kintone-webhook', async (req, res) => {
     const message = `New Kintone Record Added: ${record.Text.value}`; // Adjust field code
 
     // Send message to Slack
-    await axios.post(SLACK_WEBHOOK_URL, {
+    await axios.post(process.env.SLACK_WEBHOOK_URL, {
       text: message
     });
 
@@ -31,6 +29,7 @@ app.post('/kintone-webhook', async (req, res) => {
 });
 
 // app.listen(3000, () => {
+//   console.log('SLACK_WEBHOOK_URL:', process.env.SLACK_WEBHOOK_URL || 'Not set');
 //   console.log('Server running on http://localhost:3000');
 // });
 
