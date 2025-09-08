@@ -10,13 +10,13 @@ app.post('/kintone-webhook', async (req, res) => {
   try {
       const record = req.body.record;
       let message = '';
-      const event = req.body.event;
+      const type = req.body.type;
 
-      if (event === 'app.record.create.submit') {
+      if (type === 'ADD_RECORD') {
         message = `New Kintone Record Added: ${record.Text.value}`;
-      } else if (event === 'app.record.edit.submit') {
+      } else if (type === 'UPDATE_RECORD') {
         message = `Kintone Record Updated: ${record.Text.value}`;
-      } else if (event === 'app.record.delete.submit') {
+      } else if (type === 'DELETE_RECORD') {
         message = `Kintone Record Deleted: ${record.Text.value}`;
       } else {
         message = `Kintone Record Event`;
