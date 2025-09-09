@@ -1,37 +1,42 @@
 require('dotenv').config();
+const cors = require('cors');
 const axios = require('axios');
 const express = require('express');
 const app = express();
 app.use(express.json());
 
 // allow all origins (or restrict to your Kintone domain)
-app.use(cors({ origin: process.env.KINTONE_DOMAIN }));
+app.use(cors({
+  origin: process.env.KINTONE_DOMAIN,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 // Kintone webhook endpoint
 app.post('/kintone-webhook', async (req, res) => {
   console.log('Received Kintone webhook:', req.body);
   try {
-      const record = req.body.record;
-      let message = '';
-      const type = req.body.type;
+    const record = req.body.record;
+    let message = '';
+    const type = req.body.type;
 
-      if (type === 'ADD_RECORD') {
-        message = `New Kintone Record Added: ${record.Text.value}`;
-      } else if (type === 'UPDATE_RECORD') {
-        message = `Kintone Record Updated: ${record.Text.value}`;
-      } else if (type === 'DELETE_RECORD') {
-        message = `Kintone Record Deleted: ${record.Text.value}`;
-      } else {
-        message = `Kintone Record Event`;
-      }
+    if (type === 'ADD_RECORD') {
+      message = `New Kintone Record Added: ${record.Text.value}`;
+    } else if (type === 'UPDATE_RECORD') {
+      message = `Kintone Record Updated: ${record.Text.value}`;
+    } else if (type === 'DELETE_RECORD') {
+      message = `Kintone Record Deleted: ${record.Text.value}`;
+    } else {
+      message = `Kintone Record Event`;
+    }
 
-      // Send message to Slack
-      await axios.post(process.env.SLACK_WEBHOOK_URL, {
-        text: message
-      });
+    // Send message to Slack
+    await axios.post(process.env.SLACK_WEBHOOK_URL, {
+      text: message
+    });
 
-      console.log('Slack notification sent:', message);
-      res.status(200).send('OK');
+    console.log('Slack notification sent:', message);
+    res.status(200).send('OK');
   } catch (err) {
     console.error('Error sending to Slack:', err);
     res.status(500).send('Error');
