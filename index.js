@@ -4,6 +4,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+// allow all origins (or restrict to your Kintone domain)
+app.use(cors({ origin: process.env.KINTONE_DOMAIN }));
+
 // Kintone webhook endpoint
 app.post('/kintone-webhook', async (req, res) => {
   console.log('Received Kintone webhook:', req.body);
